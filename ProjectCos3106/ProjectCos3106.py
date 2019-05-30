@@ -5,22 +5,27 @@ password = 'pokkakungru2559'
 imap_url = 'imap.gmail.com'
 attachment_dir = 'C:/Users/USER/Documents/Code'
 
+#login to email for read email
 def auth(user,password,imap_url):
     con = imaplib.IMAP4_SSL(imap_url)
     con.login(user,password)
     return con
+#extracts the body from the email
 def get_body(msg):
     if msg.is_multipart():return get_body(msg.get_payload(0))
     else: return msg.get_payload(None,True)
+#search for a particular email
 def search(key,value,con):
     tmp, data = con.search(None,key,"'{}'".format(value))
     return data
+#extracts emails from byte array
 def get_emails(result_bytes):
     msgs = []
     for num in result_bytes[0].split():
         typ, data = con.fetch(num, '(RFC822)')
         msgs.append(data)
     return msgs
+# allows you to download attachments
 def get_attachments(msg,email_id):
     for part in msg.walk():
         if part.get_content_maintype()=='multipart':
@@ -34,8 +39,10 @@ def get_attachments(msg,email_id):
                 f.write(part.get_payload(decode=True))
 
 con = auth(user,password,imap_url)
+#A method of obtaining inbox size
 inbox_size = int(con.select('INBOX')[1][0])
 
+#Here used a for loop to go through all email ids
 for email_id in range((inbox_size-5),inbox_size):
     tmp, data = con.fetch(str(email_id).encode(), '(RFC822)')
     raw = data[0][1].decode('utf-8')
